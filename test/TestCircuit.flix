@@ -22,7 +22,7 @@ pub mod TestCircuit {
             )
 
     /// The warning that calls out a directory no circuit answers to looks for
-    /// `keptNames` in a directory and prints paths under `evidenceDir`; the evidence
+    /// `keptNames` in a directory and prints paths under `inputDir`; the evidence
     /// itself is written by `keptAnswer`. That path is made from that name here, so a
     /// name authored a second time — beside the writer of the file, say — is the
     /// directory the warning stops calling out.
@@ -33,7 +33,13 @@ pub mod TestCircuit {
                 List.memberOf(Circuit.lastPart(Circuit.keptAnswer(circuit)), Circuit.keptNames())
             );
             Assert.assertTrue(
-                String.startsWith({prefix = "${Circuit.evidenceDir()}/${circuit#word}/"}, Circuit.keptAnswer(circuit))
+                String.startsWith({prefix = "${Circuit.inputDir()}/${circuit#word}/"}, Circuit.keptAnswer(circuit))
+            );
+            Assert.assertTrue(
+                Circuit.mapOf(circuit) == "${Circuit.inputDir()}/${circuit#word}/${Circuit.mapName()}"
+            );
+            Assert.assertTrue(
+                List.memberOf(Circuit.lastPart(Circuit.mapOf(circuit)), Circuit.keptNames())
             )
         }
 

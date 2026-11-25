@@ -1,7 +1,7 @@
 # circuit-maps-3d
 
 Racing circuits as surveyed GeoJSON: OpenStreetMap's map data in, one geometry per circuit out — the lap's centreline with how far round the lap every point stands and, where a source covers the circuit, the ground's height at each point, plus the pit lane.
-Beside each geometry is the circuit-map record it was laid from, and the evidence it was surveyed from, so every published byte can be reproduced.
+Each circuit's inputs — the circuit-map record the geometry was laid from, and the evidence it was surveyed from — are kept in the repository, so every published byte can be reproduced.
 
 | Word | Circuit | Heights |
 | --- | --- | --- |
@@ -18,17 +18,19 @@ Beside each geometry is the circuit-map record it was laid from, and the evidenc
 
 | Path | What it is |
 | --- | --- |
-| `geometry/<word>.geojson` | **The published geometry.** What a consumer loads. |
-| `circuit-maps/<word>.json` | The circuit map's figures — lap length and timing lines — read by hand off the series' circuit map. The survey stretches the lap to them; a consumer may read them too. |
-| `circuits/<word>/` | The evidence: the Overpass answer the geometry was written from (`overpass.json`) and the heights its places were sampled at (`elevation.json`). Never served. |
+| `geometry/<word>.geojson` | **The output.** The published geometry, what a consumer loads; written by `--write`. |
+| `circuits/<word>/` | **The inputs.** Everything the survey reads for one circuit: |
+| `circuits/<word>/map.json` | the circuit map's figures — lap length and timing lines — read by hand off the series' circuit map; the survey stretches the lap to them; |
+| `circuits/<word>/overpass.json` | the Overpass answer the geometry was written from, kept by `--fetch`; |
+| `circuits/<word>/elevation.json` | the heights its places were sampled at, kept by `elevation --fetch`. |
 | `src/`, `test/` | The pipeline, a Flix project (`flix.toml`). |
 | `docs/adding-a-circuit.md` | The steps of adding a circuit, or taking a newer map for one. |
 
 ## Using the data
 
-Consumers need only the files under `geometry/` (and, if they lay timing lines, `circuit-maps/`). Pin a tag or commit and copy them in by whichever route suits:
+Consumers need only the files under `geometry/` (and, if they lay timing lines, each circuit's `map.json`). Pin a tag or commit and copy them in by whichever route suits:
 
-- **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/` and `circuit-maps/`.
+- **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/<word>.geojson` and the map records laid out flat as `circuit-maps/<word>.json`.
 - **HTTP** — the raw files at a pinned ref, e.g. `https://raw.githubusercontent.com/y047aka/circuit-maps-3d/<ref>/geometry/le_mans.geojson`.
 
 ### The GeoJSON profile
@@ -70,7 +72,7 @@ Each module's header says what it reads and refuses; what follows is what crosse
 
 ## One pipeline, one thin config per circuit
 
-A circuit joins as a record in `src/Circuit.flix` — the relation, or a box of raceway ground where OpenStreetMap tags no relation, the member role naming the line the lap is measured from, and the timing line's published coordinates — as a map record at `circuit-maps/<word>.json`, whose centreline is the length the surveyed line is stretched to, and as a directory named by the circuit's word.
+A circuit joins as a record in `src/Circuit.flix` — the relation, or a box of raceway ground where OpenStreetMap tags no relation, the member role naming the line the lap is measured from, and the timing line's published coordinates — and as a directory named by the circuit's word under `circuits/`, holding its map record (`map.json`), whose centreline is the length the surveyed line is stretched to.
 How each circuit is actually tagged is its config comment's to say.
 A relation may list ground under no role that the lap no longer runs — Imola's bypassed Variante Bassa chicane — and `bypassed` names those ways by id, as `pit` names the pit lane's; a chain that walked the lap and the bypassed chicane both would have to split a way.
 The config's timing-line coordinates are what make a run answering the wrong role fail before it writes anything, rather than drawing every car early.
@@ -97,7 +99,7 @@ The frame's origin is the survey's north-west corner, so the drawing never falls
 
 ## The maps' figures, kept as read
 
-`circuit-maps/<word>.json` is what the latest of the series' circuit maps prints, read off it by hand; the PDF stays out of the repository, since the maps are not to be redistributed, and the record keeps the season, the date the map was issued and the circuit's full name.
+`circuits/<word>/map.json` is what the latest of the series' circuit maps prints, read off it by hand; the PDF stays out of the repository, since the maps are not to be redistributed, and the record keeps the season, the date the map was issued and the circuit's full name.
 A new map replaces the record, and the geometry is re-laid from it with `regenerate --write`.
 `Circuit.figuresOf` refuses a record whose lines do not stand in the order a car reaches them, every one before the finish line closes the lap.
 A map gives its finish line no degrees, so where OpenStreetMap tags none at the line the authored place is read off the map's drawing laid over the survey; the config of each such circuit (Monza, Fuji) says how, and how near. Where the relation tags its own line, the map's Start Line Offset is its own check on the reading: the two nodes should stand that far apart along the lap, as São Paulo's tagged `start` and `finish` do at 60.04 m against the map's 60.2 m, as Barcelona's and COTA's tagged pair do at 127 against 128 and 296.6 against 297, and as the node behind Spa's lone `start` node does at 123.9 against 122.
@@ -132,7 +134,7 @@ A height there is the median of the ground returns within 1 m of the place, or 1
 
 **A file that will not read is a failure, not an absence.** `Util/Files.flix`'s `exists` and `isDirectory` answer a stat that answers nothing as a failure rather than `false`: an unreadable kept answer must not read as a circuit "not surveyed yet", nor an unlistable published directory as a warning with nothing to say, both of which would exit 0. `test/check-sources.mjs` holds that shape, because no test here meets a file.
 
-**The repository's layout is said once, in `Circuit.flix`**: the evidence directory, the published directories and the names a circuit's directory keeps its evidence under. The warning listing kept files that answer no circuit reads those functions; a name spelled again beside a writer is a directory the warning stops calling out. `TestCircuit` holds a circuit's geometry path to its word.
+**The repository's layout is said once, in `Circuit.flix`**: the input directory, the published directory and the names a circuit's directory keeps its inputs under. The warning listing kept files that answer no circuit reads those functions; a name spelled again beside a writer is a directory the warning stops calling out. `TestCircuit` holds a circuit's geometry path to its word.
 
 **One place decides an exit code**: every command is `arguments` over its own flag table and `asking` over its readings, and `Cli.Args.comeTo` turns either into a code. A `Verdict` — the drawing moved — is the negative answer the reader came for, said on stdout at 1; `Failed` is a run that never got to answer, said on stderr.
 `--help` is a value in `Parsed`, so `TestUsage.flix` asserts which answer a run of tokens comes to without running anything.

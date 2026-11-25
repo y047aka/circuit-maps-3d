@@ -4,9 +4,9 @@
 /// OpenStreetMap holds no relation, the box whose raceway ways are chained by standing
 /// at the authored line — and where the circuit puts its own timing line.
 /// The length the lap is stretched to and the stretches it is timed in are the circuit
-/// map's, read from the record published beside the geometry (`mapOf`) as `Figures`.
-/// The directory named by the circuit's word keeps the evidence — the kept Overpass
-/// answer — and no code. The byte fence — `nix run .#geometry -- survey <word>`
+/// map's, read from the record in the circuit's own directory (`mapOf`) as `Figures`.
+/// The directory named by the circuit's word keeps everything the survey reads — the map
+/// record, the kept Overpass answer and the sampled heights — and no code. The byte fence — `nix run .#geometry -- survey <word>`
 /// — lays them against the bytes this repository publishes.
 ///
 /// The steps a circuit joins by are `docs/adding-a-circuit.md`'s to say.
@@ -328,14 +328,9 @@ pub mod Circuit {
 
     // ------------------------------------------------------------- the circuit's map
 
-    /// The record of a circuit's map: the file it is published as, named by the
-    /// circuit's word.
+    /// The record of a circuit's map, authored by hand in the circuit's own directory.
     pub def mapOf(circuit: Circuit): String =
-        "${mapDir()}/${circuit#word}.json"
-
-    /// The directory the circuit maps are published from.
-    pub def mapDir(): String =
-        "circuit-maps"
+        keptIn(circuit, mapName())
 
     /// A map record read: the centreline is the lap, and the intermediate lines, where the
     /// map gives both, imply the three stretches. Lines out of order are refused.
@@ -418,13 +413,13 @@ pub mod Circuit {
         keptIn(circuit, keptElevationName())
 
     def keptIn(circuit: Circuit, name: String): String =
-        "${evidenceDir()}/${circuit#word}/${name}"
+        "${inputDir()}/${circuit#word}/${name}"
 
     // ------------------------------------------------------- where a circuit's files are
 
-    /// The directory a circuit keeps its evidence in: one per circuit, named by the
-    /// circuit's word.
-    pub def evidenceDir(): String =
+    /// The directory of the survey's inputs: one directory per circuit, named by the
+    /// circuit's word, holding its map record and its kept evidence.
+    pub def inputDir(): String =
         "circuits"
 
     /// The directory the geometries are published from, which is where a consumer
@@ -432,6 +427,10 @@ pub mod Circuit {
     /// rather than derived from this, and `TestCircuit` holds it to the word.
     pub def servedDir(): String =
         "geometry"
+
+    /// The name the map record is authored under in a circuit's own directory.
+    pub def mapName(): String =
+        "map.json"
 
     /// The name the Overpass answer is kept under in a circuit's own directory.
     pub def keptAnswerName(): String =
@@ -441,13 +440,13 @@ pub mod Circuit {
     pub def keptElevationName(): String =
         "elevation.json"
 
-    /// The names that say a directory was made to keep a circuit's evidence — the ones
+    /// The names that say a directory was made for a circuit — the map record, the ones
     /// `keptAnswer` and `keptElevation` write, and the ones the fence's warning looks for in a
     /// directory it listed. The warning is the reading that can be wrong unnoticed: a
     /// name spelled a second time somewhere is a directory it stops calling out, and a
     /// fence that stays green.
     pub def keptNames(): List[String] =
-        keptAnswerName() :: keptElevationName() :: Nil
+        mapName() :: keptAnswerName() :: keptElevationName() :: Nil
 
     /// A path's last part: the name a file is known by where a directory has been
     /// listed rather than a path authored. Everything above the name is dropped rather

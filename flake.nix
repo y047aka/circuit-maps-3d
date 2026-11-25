@@ -49,11 +49,15 @@
           flix run -- regenerate
         '';
 
-        # The published data alone: what a consumer reads.
+        # What a consumer reads: the geometries, and each circuit's map record laid
+        # out flat beside them as `circuit-maps/<word>.json`.
         data = pkgs.runCommand "circuit-maps-3d-data" { } ''
-          mkdir -p $out
+          mkdir -p $out/circuit-maps
           cp -r ${./geometry} $out/geometry
-          cp -r ${./circuit-maps} $out/circuit-maps
+          for dir in ${./circuits}/*/; do
+            word=$(basename "$dir")
+            cp "$dir/map.json" "$out/circuit-maps/$word.json"
+          done
         '';
 
       in {

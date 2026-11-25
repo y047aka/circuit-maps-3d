@@ -160,7 +160,7 @@ pub mod Regenerate {
             evidence <- unwordedEvidence();
             served   <- undrawn()
         ) yield
-            List.map(word -> "${Circuit.evidenceDir()}/${word}: kept evidence for no circuit — is its word misspelled?", evidence)
+            List.map(word -> "${Circuit.inputDir()}/${word}: kept inputs for no circuit — is its word misspelled?", evidence)
                 ++ List.map(file -> "${Circuit.servedDir()}/${file}: geometry no config draws", served)
 
     /// Directories under the evidence directory that hold a kept answer under a name no
@@ -168,7 +168,7 @@ pub mod Regenerate {
     /// the project's own sources among them — keeps no evidence, and says nothing.
     def unwordedEvidence(): Result[String, List[String]] \ IO =
         forM(
-            names <- listed(Circuit.evidenceDir());
+            names <- listed(Circuit.inputDir());
             keeps <- Result.traverse(keepsEvidence, names)
         ) yield
             Regenerate.Unlisted.detect(
@@ -187,7 +187,7 @@ pub mod Regenerate {
     /// directory answers; listing it and reading the failure for an empty directory would
     /// say the same thing for the wrong reason.
     def keepsEvidence(name: String): Result[String, List[String]] \ IO =
-        let at = "${Circuit.evidenceDir()}/${name}";
+        let at = "${Circuit.inputDir()}/${name}";
         if (String.startsWith({prefix = "."}, name))
             Ok(Nil)
         else

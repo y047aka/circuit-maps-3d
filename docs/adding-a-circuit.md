@@ -4,12 +4,12 @@ A circuit is one word and two published files read by that word: its map record 
 `README.md` says *why* each part is what it is; this says *what to run, in what order, and what catches you when you skip a step*.
 
 The word is snake_case, and is the word consumers ask for the circuit by (elm-motorsport-analysis uses the stem its round ids share: `fuji_6h` → `fuji`).
-It names the map record, the evidence directory and the published geometry.
+It names the circuit's input directory, `circuits/<word>/`, and the published geometry, `geometry/<word>.geojson`.
 Choose it before anything else.
 
 Paths below are relative to the repository root; the flake resolves every path from where the command is run.
 
-## 1. Write the map record — `circuit-maps/<word>.json`
+## 1. Write the map record — `circuits/<word>/map.json`
 
 The record is the one place the lap and its lines are written: the survey stretches the lap to it, the geometry carries its stretches, and a consumer may lay its timing lines from it.
 Write it before surveying; `survey` and `regenerate` read it and fail without it.
@@ -76,7 +76,7 @@ Then lay the geometry from what is kept:
 nix run .#geometry -- survey <word> --write
 ```
 
-Commit the kept answer, the heights and the `.geojson` together: the first two are re-runnable evidence, the last the published file.
+Commit `circuits/<word>/` and the `.geojson` together: the first is re-runnable evidence, the last the published file.
 To read a fresh survey against the old one: `nix run .#geometry -- diff <a.geojson> <b.geojson> [--svg ...]`.
 
 ## 5. The lists that name every circuit

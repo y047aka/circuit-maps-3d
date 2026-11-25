@@ -1,4 +1,4 @@
-/// A circuit's map record read from where it is published, for the commands that lay
+/// A circuit's map record read from the circuit's own directory, for the commands that lay
 /// a geometry or a report from its figures. What the record says is `Circuit.figuresOf`'s
 /// to read; this is the file.
 pub mod MapRecord {
