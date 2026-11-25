@@ -29,7 +29,6 @@ Beside each geometry is the circuit-map record it was laid from, and the evidenc
 Consumers need only the files under `geometry/` (and, if they lay timing lines, `circuit-maps/`). Pin a tag or commit and copy them in by whichever route suits:
 
 - **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/` and `circuit-maps/`.
-- **npm / pnpm** — `pnpm add github:y047aka/circuit-maps-3d#<tag>`; the package holds the same two directories.
 - **HTTP** — the raw files at a pinned ref, e.g. `https://raw.githubusercontent.com/y047aka/circuit-maps-3d/<ref>/geometry/le_mans.geojson`.
 
 ### The GeoJSON profile
