@@ -286,14 +286,20 @@ pub mod Circuit {
     }
 
     /// Imola. The relation `9291096` lists its 35 lap ways under no role at all, names one
-    /// way `pit_lane`, and tags one node `start`.
+    /// way `pit_lane`, and tags one node `start`; no role names the finish line, so the lap
+    /// is turned at the authored place.
     ///
-    /// That node is the map's finish line, not its Start Line: the map draws its Start Line
-    /// `218 m` and its Pit Out `222.8 m` after the line, and laid over the survey those two
-    /// fall `210 m` and `228 m` after `start` along the lap. `timingLine` is that node's own
-    /// place in the kept answer, so it checks the line against nothing but itself, and is
-    /// there so that a re-fetch answering a `start` moved more than 10 m fails before it
-    /// writes anything.
+    /// The `start` node is the map's Start Line, not its finish line: it stands 229 m after
+    /// the finish line read below, against the 218 m Start Line Offset the map prints.
+    /// The authored place is the series' 2026 map's finish line, which no source gives in
+    /// degrees: the map, laid over the survey at 1.7 m a pixel to a median 0.4 px, draws
+    /// its finish line 238 m before `start` along the lap, and changes its sector colour
+    /// at i1 and i2 where a finish line 227 m and 221 m before `start` would put them; the
+    /// place is the survey's point 229 m before `start`, good to some 10 m. From there the
+    /// printed Start Line (218 m) falls 11 m before `start` and Pit Out (222.8 m) 6 m before
+    /// it. The map draws its Start Line 290 m round, which no figure it prints agrees with.
+    /// The series' sector times at the 2025 and 2026 races share their laps out as a lap
+    /// timed from this place would, and not as one timed from `start`.
     ///
     /// `bypassed` names the Variante Bassa chicane. The relation lists it under no role, as
     /// it lists every way the lap does run, and the bypass runs through the two nodes the
@@ -310,8 +316,8 @@ pub mod Circuit {
         pit      = None,
         bypassed = Some(176764793i64 :: 1025616646i64 :: 1025616647i64 :: Nil),
         word     = "imola",
-        timedFrom = "start",
-        timingLine = Some({place = {lon = 11.7140173, lat = 44.3444055}, within = Some(10.0)}),
+        timedFrom = "",
+        timingLine = Some({place = {lon = 11.7168418, lat = 44.3440472}, within = Some(25.0)}),
         elevation = Some(Elevation.Source.EmiliaRomagnaDtm),
         file   = "geometry/imola.geojson",
         survey = "The Autodromo Internazionale Enzo e Dino Ferrari"
