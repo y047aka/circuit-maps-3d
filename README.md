@@ -30,7 +30,7 @@ Each circuit's inputs — the spec the geometry was laid from, and the evidence 
 
 Consumers need only the files under `geometry/` (and, if they lay timing lines, each circuit's `spec.json`). Pin a tag or commit and copy them in by whichever route suits:
 
-- **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/<word>.geojson` and the specs laid out flat as `circuit-maps/<word>.json`.
+- **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/<word>.geojson` and the specs laid out flat as `specs/<word>.json`.
 - **HTTP** — the raw files at a pinned ref, e.g. `https://raw.githubusercontent.com/y047aka/circuit-maps-3d/<ref>/geometry/le_mans.geojson`.
 
 ### The GeoJSON profile

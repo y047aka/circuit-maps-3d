@@ -50,13 +50,13 @@
         '';
 
         # What a consumer reads: the geometries, and each circuit's spec laid
-        # out flat beside them as `circuit-maps/<word>.json`.
+        # out flat beside them as `specs/<word>.json`.
         data = pkgs.runCommand "circuit-maps-3d-data" { } ''
-          mkdir -p $out/circuit-maps
+          mkdir -p $out/specs
           cp -r ${./geometry} $out/geometry
           for dir in ${./circuits}/*/; do
             word=$(basename "$dir")
-            cp "$dir/spec.json" "$out/circuit-maps/$word.json"
+            cp "$dir/spec.json" "$out/specs/$word.json"
           done
         '';
 
