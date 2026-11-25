@@ -1,7 +1,7 @@
 # circuit-maps-3d
 
 Racing circuits as surveyed GeoJSON: OpenStreetMap's map data in, one geometry per circuit out — the lap's centreline with how far round the lap every point stands and, where a source covers the circuit, the ground's height at each point, plus the pit lane.
-Each circuit's inputs — the circuit-map record the geometry was laid from, and the evidence it was surveyed from — are kept in the repository, so every published byte can be reproduced.
+Each circuit's inputs — the spec the geometry was laid from, and the evidence it was surveyed from — are kept in the repository, so every published byte can be reproduced.
 
 | Word | Circuit | Heights |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ Each circuit's inputs — the circuit-map record the geometry was laid from, and
 | --- | --- |
 | `geometry/<word>.geojson` | **The output.** The published geometry, what a consumer loads; written by `--write`. |
 | `circuits/<word>/` | **The inputs.** Everything the survey reads for one circuit: |
-| `circuits/<word>/map.json` | the circuit map's figures — lap length and timing lines — read by hand off the series' circuit map; the survey stretches the lap to them; |
+| `circuits/<word>/spec.json` | the circuit's spec — lap length, timing lines, sectors, corners — read by hand off the series' circuit map; the survey stretches the lap to them; |
 | `circuits/<word>/overpass.json` | the Overpass answer the geometry was written from, kept by `--fetch`; |
 | `circuits/<word>/elevation.json` | the heights its places were sampled at, kept by `elevation --fetch`. |
 | `src/`, `test/` | The pipeline, a Flix project (`flix.toml`). |
@@ -28,9 +28,9 @@ Each circuit's inputs — the circuit-map record the geometry was laid from, and
 
 ## Using the data
 
-Consumers need only the files under `geometry/` (and, if they lay timing lines, each circuit's `map.json`). Pin a tag or commit and copy them in by whichever route suits:
+Consumers need only the files under `geometry/` (and, if they lay timing lines, each circuit's `spec.json`). Pin a tag or commit and copy them in by whichever route suits:
 
-- **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/<word>.geojson` and the map records laid out flat as `circuit-maps/<word>.json`.
+- **Nix flake** — `inputs.circuit-maps-3d.url = "github:y047aka/circuit-maps-3d";` and `circuit-maps-3d.packages.${system}.default` is a store path holding `geometry/<word>.geojson` and the specs laid out flat as `circuit-maps/<word>.json`.
 - **HTTP** — the raw files at a pinned ref, e.g. `https://raw.githubusercontent.com/y047aka/circuit-maps-3d/<ref>/geometry/le_mans.geojson`.
 
 ### The GeoJSON profile
@@ -97,17 +97,17 @@ A survey that moved is a change for every consumer drawing on those degrees; the
 Every surveyed point is held in OpenStreetMap's degrees with how far round the lap it stands, and a consumer projects them through the `frame` written beside them.
 The frame's origin is the survey's north-west corner, so the drawing never falls below zero.
 
-## The maps' figures, kept as read
+## The spec, kept as read
 
-`circuits/<word>/map.json` is what the latest of the series' circuit maps prints, read off it by hand; the PDF stays out of the repository, since the maps are not to be redistributed, and the record keeps the season, the date the map was issued and the circuit's full name.
-A new map replaces the record, and the geometry is re-laid from it with `regenerate --write`.
-`Circuit.figuresOf` refuses a record whose lines do not stand in the order a car reaches them, every one before the finish line closes the lap.
+`circuits/<word>/spec.json` is what the latest of the series' circuit maps prints, read off it by hand; the PDF stays out of the repository, since the maps are not to be redistributed, and the spec keeps the season, the date the map was issued and the circuit's full name.
+A new map replaces the spec, and the geometry is re-laid from it with `regenerate --write`.
+`Circuit.figuresOf` refuses a spec whose lines do not stand in the order a car reaches them, every one before the finish line closes the lap.
 A map gives its finish line no degrees, so where OpenStreetMap tags none at the line the authored place is read off the map's drawing laid over the survey; the config of each such circuit (Monza, Fuji) says how, and how near. Where the relation tags its own line, the map's Start Line Offset is its own check on the reading: the two nodes should stand that far apart along the lap, as São Paulo's tagged `start` and `finish` do at 60.04 m against the map's 60.2 m, as Barcelona's and COTA's tagged pair do at 127 against 128 and 296.6 against 297, and as the node behind Spa's lone `start` node does at 123.9 against 122.
 A lone `start` node is not always the map's Start Line — Imola's is its finish line, with the map's Start Line and Pit Out falling 210 m and 228 m after it against the 218 m and 222.8 m the map prints — so which of the two a lone `start` names is the map's drawing's to say, and the config comment records it.
 Every figure is kept twice, as `metres` and as the map printed it, because the print carries the precision the map was written to (0.01 m at Le Mans, whole metres elsewhere) and its decimal comma.
 `lengths` and `lines` hold only what the map gives a distance for, every line measured from the finish line; `drawn` names what it draws without one, and lists such as Le Mans's timing loops are kept in the map's own order.
 `sectors` and Le Mans's `zones` are the stretches the map colours, each bounded by the drawn labels its colour changes at.
-A map's figures need not agree with one another: Lap by Pits should be the centreline less the track between Pit In and Pit Out plus the pit lane, and 2026's Fuji map misses that by 9 m and Barcelona's by 5.2 m. São Paulo's 2026 map misses it by 3 m and Spa's by 48 m, and at Spa Pit In - Pit Out (386.6 m) is all but the track between its own Pit In and Pit Out lines (386.4 m); the record keeps what the map prints either way.
+A map's figures need not agree with one another: Lap by Pits should be the centreline less the track between Pit In and Pit Out plus the pit lane, and 2026's Fuji map misses that by 9 m and Barcelona's by 5.2 m. São Paulo's 2026 map misses it by 3 m and Spa's by 48 m, and at Spa Pit In - Pit Out (386.6 m) is all but the track between its own Pit In and Pit Out lines (386.4 m); the spec keeps what the map prints either way.
 
 ## The heights
 

@@ -4,9 +4,9 @@
 /// OpenStreetMap holds no relation, the box whose raceway ways are chained by standing
 /// at the authored line — and where the circuit puts its own timing line.
 /// The length the lap is stretched to and the stretches it is timed in are the circuit
-/// map's, read from the record in the circuit's own directory (`mapOf`) as `Figures`.
-/// The directory named by the circuit's word keeps everything the survey reads — the map
-/// record, the kept Overpass answer and the sampled heights — and no code. The byte fence — `nix run .#geometry -- survey <word>`
+/// map's, read from the spec in the circuit's own directory (`specOf`) as `Figures`.
+/// The directory named by the circuit's word keeps everything the survey reads — the
+/// spec, the kept Overpass answer and the sampled heights — and no code. The byte fence — `nix run .#geometry -- survey <word>`
 /// — lays them against the bytes this repository publishes.
 ///
 /// The steps a circuit joins by are `docs/adding-a-circuit.md`'s to say.
@@ -326,20 +326,21 @@ pub mod Circuit {
     pub def byWord(word: String): Option[Circuit] =
         List.find(circuit -> circuit#word == word, circuits())
 
-    // ------------------------------------------------------------- the circuit's map
+    // ------------------------------------------------------------ the circuit's spec
 
-    /// The record of a circuit's map, authored by hand in the circuit's own directory.
-    pub def mapOf(circuit: Circuit): String =
-        keptIn(circuit, mapName())
+    /// A circuit's spec — the figures its series' circuit map publishes — authored by hand
+    /// in the circuit's own directory.
+    pub def specOf(circuit: Circuit): String =
+        keptIn(circuit, specName())
 
-    /// A map record read: the centreline is the lap, and the intermediate lines, where the
+    /// A spec read: the centreline is the lap, and the intermediate lines, where the
     /// map gives both, imply the three stretches. Lines out of order are refused.
     /// A stretch is the difference of two printed distances, and is held to the hundredth
     /// of a metre the most precise map prints, so that it is written as the map prints it
     /// and not as the double the subtraction left.
     pub def figuresOf(text: String): Result[String, Figures] =
         match Util.Json.parse(text) {
-            case Err(problem) => Err("the map record is no JSON: ${problem}")
+            case Err(problem) => Err("the spec is no JSON: ${problem}")
             case Ok(json) =>
                 forM(
                     season <- wholeAt("season" :: Nil, json);
@@ -367,7 +368,7 @@ pub mod Circuit {
         if (List.forAll(pair -> match pair { case (one, next) => one < next }, List.zip(stops, List.drop(1, stops))))
             Ok(())
         else
-            Err("the map's lines do not stand in order round its ${Util.Format.whole(lap)} m lap")
+            Err("the spec's lines do not stand in order round its ${Util.Format.whole(lap)} m lap")
 
     def hundredth(metres: Float64): Float64 =
         Float64.round(metres * 100.0) / 100.0
@@ -388,13 +389,13 @@ pub mod Circuit {
             case Some(Json.JNumber(spelled)) =>
                 match Float64.fromString(BigDecimal.toPlainString(spelled)) {
                     case Some(number) => Ok(Some(number))
-                    case None         => Err("the map record's ${String.intercalate(".", path)} is a number no double reads")
+                    case None         => Err("the spec's ${String.intercalate(".", path)} is a number no double reads")
                 }
-            case Some(_) => Err("the map record's ${String.intercalate(".", path)} is not a number")
+            case Some(_) => Err("the spec's ${String.intercalate(".", path)} is not a number")
         }
 
     def metresAt(path: List[String], json: Json): Result[String, Float64] =
-        numberAt(path, json) |> Result.flatMap(found -> Option.toOk("the map record gives no ${String.intercalate(".", path)}", found))
+        numberAt(path, json) |> Result.flatMap(found -> Option.toOk("the spec gives no ${String.intercalate(".", path)}", found))
 
     def optionalMetresAt(path: List[String], json: Json): Result[String, Option[Float64]] =
         numberAt(path, json)
@@ -418,7 +419,7 @@ pub mod Circuit {
     // ------------------------------------------------------- where a circuit's files are
 
     /// The directory of the survey's inputs: one directory per circuit, named by the
-    /// circuit's word, holding its map record and its kept evidence.
+    /// circuit's word, holding its spec and its kept evidence.
     pub def inputDir(): String =
         "circuits"
 
@@ -428,9 +429,9 @@ pub mod Circuit {
     pub def servedDir(): String =
         "geometry"
 
-    /// The name the map record is authored under in a circuit's own directory.
-    pub def mapName(): String =
-        "map.json"
+    /// The name the spec is authored under in a circuit's own directory.
+    pub def specName(): String =
+        "spec.json"
 
     /// The name the Overpass answer is kept under in a circuit's own directory.
     pub def keptAnswerName(): String =
@@ -440,13 +441,13 @@ pub mod Circuit {
     pub def keptElevationName(): String =
         "elevation.json"
 
-    /// The names that say a directory was made for a circuit — the map record, the ones
+    /// The names that say a directory was made for a circuit — the spec, the ones
     /// `keptAnswer` and `keptElevation` write, and the ones the fence's warning looks for in a
     /// directory it listed. The warning is the reading that can be wrong unnoticed: a
     /// name spelled a second time somewhere is a directory it stops calling out, and a
     /// fence that stays green.
     pub def keptNames(): List[String] =
-        mapName() :: keptAnswerName() :: keptElevationName() :: Nil
+        specName() :: keptAnswerName() :: keptElevationName() :: Nil
 
     /// A path's last part: the name a file is known by where a directory has been
     /// listed rather than a path authored. Everything above the name is dropped rather

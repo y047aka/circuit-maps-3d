@@ -362,7 +362,7 @@ pub mod Elevation {
     /// from.
     def keptInputs(circuit: Circuit): Result[String, (String, Circuit.Figures)] \ IO =
         forM(
-            figures <- MapRecord.read(circuit);
+            figures <- Spec.read(circuit);
             text    <- Cli.Errors.readFile(Circuit.keptAnswer(circuit)) |> Result.mapErr(problem -> "${problem}")
         ) yield (text, figures)
 

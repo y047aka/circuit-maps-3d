@@ -272,7 +272,7 @@ pub mod Regenerate {
     /// kept answer fail in the same words.
     def surveyed(circuit: Circuit, answer: String, mode: Mode): Result[String, Verdict] \ { IO, Console } =
         match forM(
-            figures <- MapRecord.read(circuit);
+            figures <- Spec.read(circuit);
             _       <- if (mode == Mode.Freeze) frozen(circuit, answer, figures) else Ok(());
             heights <- Elevation.keptText(circuit);
             read    <- Survey.geometry(answer, heights, circuit, figures) |> Result.mapErr(problem -> if (mode == Mode.Freeze) "the fresh answer is kept, and ${problem}" else problem)

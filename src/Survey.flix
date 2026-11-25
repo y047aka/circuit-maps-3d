@@ -1137,7 +1137,7 @@ pub mod Survey {
             case Ok(Some(spelled)) =>
                 Cli.Args.outcomeOf(
                     forM(
-                        figures <- MapRecord.read(asked#circuit) |> Result.mapErr(CliError.Reading);
+                        figures <- Spec.read(asked#circuit) |> Result.mapErr(CliError.Reading);
                         _       <- if (asked#fetch) surveyed(asked, spelled, None, figures) |> Result.flatMap(keep(asked)) else Ok(());
                         heights <- Elevation.keptText(asked#circuit) |> Result.mapErr(CliError.Reading);
                         read    <- surveyed(asked, spelled, heights, figures)

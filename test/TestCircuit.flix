@@ -3,7 +3,7 @@
 /// names, so the directories and the names inside them are stated once, in
 /// `Circuit.flix`; the config still authors its own geometry path, and this is where
 /// those authored paths are laid against the words that name them, and how a circuit's
-/// map record is read.
+/// spec is read.
 ///
 /// What is not tested here is the bytes a path leads to: that is the byte fence's, which
 /// reads the real files.
@@ -36,10 +36,10 @@ pub mod TestCircuit {
                 String.startsWith({prefix = "${Circuit.inputDir()}/${circuit#word}/"}, Circuit.keptAnswer(circuit))
             );
             Assert.assertTrue(
-                Circuit.mapOf(circuit) == "${Circuit.inputDir()}/${circuit#word}/${Circuit.mapName()}"
+                Circuit.specOf(circuit) == "${Circuit.inputDir()}/${circuit#word}/${Circuit.specName()}"
             );
             Assert.assertTrue(
-                List.memberOf(Circuit.lastPart(Circuit.mapOf(circuit)), Circuit.keptNames())
+                List.memberOf(Circuit.lastPart(Circuit.specOf(circuit)), Circuit.keptNames())
             )
         }
 

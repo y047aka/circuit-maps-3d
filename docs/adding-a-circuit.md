@@ -1,6 +1,6 @@
 # Adding a circuit
 
-A circuit is one word and two published files read by that word: its map record and its geometry.
+A circuit is one word and two published files read by that word: its spec and its geometry.
 `README.md` says *why* each part is what it is; this says *what to run, in what order, and what catches you when you skip a step*.
 
 The word is snake_case, and is the word consumers ask for the circuit by (elm-motorsport-analysis uses the stem its round ids share: `fuji_6h` → `fuji`).
@@ -9,12 +9,12 @@ Choose it before anything else.
 
 Paths below are relative to the repository root; the flake resolves every path from where the command is run.
 
-## 1. Write the map record — `circuits/<word>/map.json`
+## 1. Write the spec — `circuits/<word>/spec.json`
 
-The record is the one place the lap and its lines are written: the survey stretches the lap to it, the geometry carries its stretches, and a consumer may lay its timing lines from it.
+The spec is the one place the lap and its lines are written: the survey stretches the lap to it, the geometry carries its stretches, and a consumer may lay its timing lines from it.
 Write it before surveying; `survey` and `regenerate` read it and fail without it.
 
-Read the series' circuit map (the PDF stays out of the repository) into the shape the other records keep; `README.md`'s maps section says what each part holds.
+Read the series' circuit map (the PDF stays out of the repository) into the shape the other specs keep; `README.md`'s spec section says what each part holds.
 What the code reads, and so must be right:
 
 - `season` — the season of the map.
@@ -23,7 +23,7 @@ What the code reads, and so must be right:
 
 Every figure is written twice, as `metres` and as the map printed it.
 Before going on, check by hand what no reader checks: each `printed` figure reads as its `metres`, and Lap by Pits comes back from the centreline, Pit In, Pit Out and the pit lane — a miss is recorded in the README, not corrected.
-The lines' order is checked: a record whose lines do not run 0 < i1 < i2 < centreline is refused.
+The lines' order is checked: a spec whose lines do not run 0 < i1 < i2 < centreline is refused.
 
 ## 2. Probe before authoring
 
@@ -99,8 +99,8 @@ Then release (tag) the change, and draw it consumer-side: in elm-motorsport-anal
 
 ## A newer map for a circuit already here
 
-1. Replace the record's figures, `season` and `issued` with the new map's, and check them as in step 1.
-2. `nix run .#geometry -- regenerate <word> --write` re-lays the geometry on the new lap and stretches; commit both files together. A record changed alone is a geometry whose lap and sectors no longer match it, and the fence fails.
+1. Replace the spec's figures, `season` and `issued` with the new map's, and check them as in step 1.
+2. `nix run .#geometry -- regenerate <word> --write` re-lays the geometry on the new lap and stretches; commit both files together. A spec changed alone is a geometry whose lap and sectors no longer match it, and the fence fails.
 3. `nix run .#fence`.
 
 ## Hazards
