@@ -1,0 +1,32 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: DeterminateSystems/nix-installer-action@v16
+      - uses: nix-community/cache-nix-action@v7
+        with:
+          primary-key: nix-${{ runner.os }}-${{ hashFiles('flake.lock') }}
+          restore-prefixes-first-match: nix-${{ runner.os }}-
+      # Coursier caches what a Flix project resolves under the project's own
+      # `lib`, not under ~/.cache/coursier. Uncached, every run asks Maven
+      # Central again, and Central answers a busy runner with a 429.
+      - uses: actions/cache@v6
+        with:
+          path: lib
+          key: flix-deps-${{ runner.os }}-${{ hashFiles('flix.toml') }}
+          restore-keys: flix-deps-${{ runner.os }}-
+      - name: Tests
+        run: nix run .#test
+      # The byte fence over every kept answer, never with `--write`.
+      - name: Every kept answer reproduces the published geometry
+        run: nix run .#fence

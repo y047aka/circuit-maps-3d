@@ -1,0 +1,43 @@
+// The circuit geometry pipeline, under one jar:
+//
+//     nix run .#geometry -- survey    <circuit> [--answer <overpass.json>] [--fetch] [--write]
+//     nix run .#geometry -- diff      <a.geojson> <b.geojson> [--every <m>] [--svg <out.svg>]
+//     nix run .#geometry -- elevation <circuit> [--fetch]
+//     nix run .#geometry -- regenerate [<circuit> ...] [--write | --freeze]
+//     nix run .#geometry -- probe     <lat>,<lon> [...] [--radius <km>]
+//
+// Each word is a module — its readings, its asking if it asks one, and its
+// printing; this is the dispatch of a word, the usage a wrong one is answered
+// with, and the exit code one comes to.
+use Sys.Console
+use Sys.Env
+use Sys.Exit
+use Time.Clock
+
+def main(): Unit \ { Env, IO, Clock, Exit, Console } =
+    match Env.getArgs() {
+        case Nil =>
+            Console.println(usage());
+            Exit.exit(0)
+        case "--help" :: _ =>
+            Console.println(usage());
+            Exit.exit(0)
+        case "diff" :: rest =>
+            Exit.exit(Diff.exitCode(rest))
+        case "elevation" :: rest =>
+            Exit.exit(Elevation.exitCode(rest))
+        case "probe" :: rest =>
+            Exit.exit(Probe.exitCode(rest))
+        case "regenerate" :: rest =>
+            Exit.exit(Regenerate.exitCode(rest))
+        case "survey" :: rest =>
+            Exit.exit(Survey.exitCode(rest))
+        case word :: _ =>
+            Console.eprintln("\"${word}\" is no command of these");
+            Console.eprintln(usage());
+            Exit.exit(1)
+    }
+
+/// Each command's own usage: the flake app a reader types, beside the arguments it takes.
+def usage(): String =
+    Diff.usage() + "\n${Elevation.usage()}" + "\n${Probe.usage()}" + "\n${Regenerate.usage()}" + "\n${Survey.usage()}"
