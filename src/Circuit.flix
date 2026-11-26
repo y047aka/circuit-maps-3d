@@ -190,10 +190,14 @@ pub mod Circuit {
     /// and names its pit under `pit_lane`. Its `start` and `finish` roles both name
     /// one node — and that node is a `highway=traffic_signals` point, the pit-exit
     /// light — so no role is named, and the lap is turned at the authored place.
-    /// That place is the series' 2026 map's finish line, which no source gives in degrees:
-    /// the map, laid over the survey, puts its finish line, its pit-in line and i2 between
-    /// 298 and 334 m before the light, and the place is the survey's point 320 m before it.
-    /// The map is drawn wider than the circuit, so the place is good to some 20 m.
+    /// That place is the series' 2026 map's finish line, which no source gives in degrees.
+    /// The map is drawn at 0.78 to 1.15 m a pixel from one stretch to the next, so it is
+    /// laid over the survey a stretch at a time, each to a median 1 px: it draws its finish
+    /// line 323 m before the light, and changes its sector colour at i2 25 m later than its
+    /// printed 3,727 m from the place; the place is the survey's point 320 m before the
+    /// light, good to some 20 m, from which the light stands 12 m before the printed Pit Out
+    /// (332 m), where the map draws its Pit Out line. Its i1 is drawn 134 m earlier than its printed 2,055 m,
+    /// 231 m before the Roggia rather than 97 m, so the place is not read off it.
     def monza(): Circuit = {
         relation = Some(284565i64),
         box      = None,
